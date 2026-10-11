@@ -8,25 +8,36 @@ ECE 361 - Homework 2
 
 3. The minimum, maximum, and mean loop appears two times and can be altered to be one function.
 
-4. Looking through the starter code, here's the split of what each module might include:
+4. MODULE DIAGRAM
+                        -------------
+                        |   Main    |
+                        -------------
+                        V           V
+            --------------------------------------
+            |   Reading   |  Stats  | Histogram  |
+            --------------------------------------
+
+5. The smaller pieces used in only one file can be become static helped functions, like checking whether a line is blank or a comment, and finding which bin the temperature goes to in the histogram.
+   
+7. Looking through the starter code, here's the split of what each module might include:
 MAIN
 - MAX_READINGS (size of main's arrays)
 - int main(int argc, char *argv[]): command line checks usage error (if argc > 2) and if argc == 2 then read the threshold with strtof 
-- arrays and variables global in started changed to local
+- arrays and variables global in starter changed to local
 - results (prints and returns): readings, skipped, temperature, humidity
 - printing the longest run (if (best == 0)):
-- calling reading, stats, and hisotgram
+- calling reading, stats, and histogram
 
 READING
 - LINE_LEN
-- char line[LINE-LEN]
+- char line[LINE_LEN]
 - while (fgets()) loop
 - give count and skipped results to main
 
 STATS
 - max_temp (int i): rewritten as recursive stats_max(a, n)
 - minimum and mean loop
-- humiditity (min, max, mean loop): replaced by adding the same functions on hums
+- humidity (min, max, mean loop): replaced by adding the same functions on hums
 - longest run loop: gives back the run's length and where it starts results
 
 HISTOGRAM
