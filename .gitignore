@@ -1,0 +1,5 @@
+*.o
+hw02/readings
+hw02/tests/test_stats
+hw02/tests/depth
+out.txt
