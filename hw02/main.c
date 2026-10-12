@@ -9,18 +9,18 @@
  * Usage: ./readings [threshold] < data/normal.txt
  *        threshold is in degrees C, default 30.0
  *
- * Step 1 of the refactor: the statistics now come from the stats module.
- * Still to do: histogram, reading, and removing the globals.
+ * Step 2 of the refactor: the statistics come from the stats module and the
+ * histogram from the histogram module. Still to do: reading, and removing
+ * the globals.
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "stats.h"
+#include "histogram.h"
 
 #define MAX_READINGS 1000
 #define LINE_LEN     128
-#define NUM_BINS     20          /* histogram: 0 to 100 C in 5 C bins */
-#define BIN_WIDTH    5.0f
 
 int   ticks[MAX_READINGS];
 float temps[MAX_READINGS];
@@ -82,24 +82,6 @@ int main(int argc, char *argv[]) {
         printf("above %.1f C: longest run %d readings, from tick %d to tick %d\n",
                threshold, run.length, ticks[run.start], ticks[run.start + run.length - 1]);
 
-    /* histogram of temperatures, 5 C bins; values outside 0..100 go to the end bins */
-    int bins[NUM_BINS] = {0};
-    for (int i = 0; i < count; i++) {
-        int b = (int) (temps[i] / BIN_WIDTH);
-        if (temps[i] < 0.0f)
-            b = 0;
-        if (b >= NUM_BINS)
-            b = NUM_BINS - 1;
-        bins[b]++;
-    }
-    printf("histogram:\n");
-    for (int b = 0; b < NUM_BINS; b++) {
-        if (bins[b] == 0)
-            continue;
-        printf("  %5.1f to %5.1f C | ", b * BIN_WIDTH, (b + 1) * BIN_WIDTH);
-        for (int k = 0; k < bins[b]; k++)
-            putchar('*');
-        printf(" %d\n", bins[b]);
-    }
+    histogram_print(temps, count);
     return 0;
 }
