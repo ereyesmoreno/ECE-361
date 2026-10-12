@@ -1,6 +1,15 @@
 Estefani Reyes Moreno
 ECE 361 - Homework 2 
 
+Build and test:
+make : builds ./readings from main.c, reading.c, stats.c, histogram.c
+make test : builds and runs tests/test_stats, then the regression test (sh regress.sh)
+make clean : removes readings, the .o files, and tests/test_stats
+
+Run: 
+./readings < data/normal.txt
+./readings 25 < data/edge.txt
+
 1. Because no global variables are allowed, the current ones in readings.c would have to be changed. That would be ticks, temps, hums, count, skipped, and threshold as local variables in the main program and passed as parameters to the function that needs them. The readings.c file also needs to be split up into different pieces (reading, stats, and histogram).
 
 2. max_temp(int i) only works on the global temps array, because it reads temps and count directly. It will need to be changed to a recursive function that takes an array input and length: const float a[] and int n. This will allow it to work for temperature and humidity.
@@ -8,10 +17,11 @@ ECE 361 - Homework 2
 3. The minimum, maximum, and mean loop appears two times and can be altered to be one function.
 
 4. MODULE DIAGRAM
-                        -------------
-                        |   Main    |
-                        -------------
-                        V           V
+                        --------------
+                        |    Main    |
+                        --------------
+                        |      |     |
+                        V      V     V
             --------------------------------------
             |   Reading   |  Stats  | Histogram  |
             --------------------------------------
@@ -43,4 +53,4 @@ HISTOGRAM
 - NUM_BINS
 - BIN_WIDTH
 - the loops that counts each temperature into a bin
-- the loop that prints each non-empty bin: the range, th *s, and the count
+- the loop that prints each non-empty bin: the range, th *s, and the loop that counts
