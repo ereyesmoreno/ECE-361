@@ -19,8 +19,8 @@ CFLAGS = -std=c11 -Wall -Wextra -g
 # Step 1 (stats):     add stats.o
 # Step 2 (histogram): add histogram.o
 # Step 3 (reading):   add reading.o
-OBJS = main.o
-# OBJS = main.o stats.o
+# OBJS = main.o
+OBJS = main.o stats.o
 # OBJS = main.o stats.o histogram.o
 # OBJS = main.o stats.o histogram.o reading.o
 
@@ -31,8 +31,8 @@ readings: $(OBJS)
 # ---- dependencies: each .o on its .c and EVERY header that .c includes ----
 # No recipe needed: make's built-in rule compiles X.c into X.o using
 # $(CC) $(CFLAGS). When main.c starts to #include a header, add it here.
-main.o: main.c
-# stats.o: stats.c stats.h
+main.o: main.c stats.h
+stats.o: stats.c stats.h
 # histogram.o: histogram.c histogram.h
 # reading.o: reading.c reading.h
 

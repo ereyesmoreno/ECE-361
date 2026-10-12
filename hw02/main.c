@@ -1,26 +1,21 @@
 /*
- * readings.c: ECE 361, Fall 2026, HW2 starter
+ * main.c: ECE 361, Fall 2026, HW2
  *
  * Reads sensor readings from standard input and prints a summary: the number
  * of readings, the minimum, maximum, and mean temperature and humidity, the
  * longest run of readings above a temperature threshold, and a histogram of
  * the temperatures.
  *
- * Input: one reading per line, "tick temperature humidity", for example
- *     12  23.5  41.0
- * Blank lines and lines starting with '#' are ignored. A line that does not
- * hold three numbers is counted as skipped.
- *
  * Usage: ./readings [threshold] < data/normal.txt
  *        threshold is in degrees C, default 30.0
  *
- * The program works. It is also one file, with global variables, repeated
- * code, and a main() that does everything. HW2 asks you to split it into
- * modules without changing what it prints.
+ * Step 1 of the refactor: the statistics now come from the stats module.
+ * Still to do: histogram, reading, and removing the globals.
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "stats.h"
 
 #define MAX_READINGS 1000
 #define LINE_LEN     128
@@ -33,14 +28,6 @@ float hums[MAX_READINGS];
 int   count = 0;
 int   skipped = 0;
 float threshold = 30.0f;
-
-/* largest temperature from index i to the end, recursively */
-float max_temp(int i) {
-    if (i == count - 1)
-        return temps[i];
-    float rest = max_temp(i + 1);
-    return temps[i] > rest ? temps[i] : rest;
-}
 
 int main(int argc, char *argv[]) {
     char line[LINE_LEN];
@@ -81,49 +68,19 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    /* temperature: min and mean */
-    float tmin = temps[0];
-    float tsum = 0.0f;
-    for (int i = 0; i < count; i++) {
-        if (temps[i] < tmin)
-            tmin = temps[i];
-        tsum += temps[i];
-    }
-    printf("temperature: min %6.1f  max %6.1f  mean %6.2f C\n", tmin, max_temp(0), tsum / count);
-
-    /* humidity: min, max, and mean, the same loop again */
-    float hmin = hums[0];
-    float hmax = hums[0];
-    float hsum = 0.0f;
-    for (int i = 0; i < count; i++) {
-        if (hums[i] < hmin)
-            hmin = hums[i];
-        if (hums[i] > hmax)
-            hmax = hums[i];
-        hsum += hums[i];
-    }
-    printf("humidity:    min %6.1f  max %6.1f  mean %6.2f %%RH\n", hmin, hmax, hsum / count);
+    /* temperature and humidity: each statistic is one function, called twice */
+    printf("temperature: min %6.1f  max %6.1f  mean %6.2f C\n",
+           stats_min(temps, count), stats_max(temps, count), stats_mean(temps, count));
+    printf("humidity:    min %6.1f  max %6.1f  mean %6.2f %%RH\n",
+           stats_min(hums, count), stats_max(hums, count), stats_mean(hums, count));
 
     /* longest run of consecutive readings above the threshold */
-    int run = 0, best = 0, best_start = -1, start = 0;
-    for (int i = 0; i < count; i++) {
-        if (temps[i] > threshold) {
-            if (run == 0)
-                start = i;
-            run++;
-            if (run > best) {
-                best = run;
-                best_start = start;
-            }
-        } else {
-            run = 0;
-        }
-    }
-    if (best == 0)
+    struct stats_run run = stats_longest_run_above(temps, count, threshold);
+    if (run.length == 0)
         printf("above %.1f C: never\n", threshold);
     else
         printf("above %.1f C: longest run %d readings, from tick %d to tick %d\n",
-               threshold, best, ticks[best_start], ticks[best_start + best - 1]);
+               threshold, run.length, ticks[run.start], ticks[run.start + run.length - 1]);
 
     /* histogram of temperatures, 5 C bins; values outside 0..100 go to the end bins */
     int bins[NUM_BINS] = {0};
