@@ -9,28 +9,23 @@
  * Usage: ./readings [threshold] < data/normal.txt
  *        threshold is in degrees C, default 30.0
  *
- * Step 2 of the refactor: the statistics come from the stats module and the
- * histogram from the histogram module. Still to do: reading, and removing
- * the globals.
+ * main handles the command line, calls the modules, and prints the results.
+ * There are no global variables: the readings live here and are passed to
+ * the functions that need them.
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include "reading.h"
 #include "stats.h"
 #include "histogram.h"
 
 #define MAX_READINGS 1000
-#define LINE_LEN     128
-
-int   ticks[MAX_READINGS];
-float temps[MAX_READINGS];
-float hums[MAX_READINGS];
-int   count = 0;
-int   skipped = 0;
-float threshold = 30.0f;
 
 int main(int argc, char *argv[]) {
-    char line[LINE_LEN];
+    int   ticks[MAX_READINGS];
+    float temps[MAX_READINGS];
+    float hums[MAX_READINGS];
+    float threshold = 30.0f;
 
     if (argc > 2) {
         fprintf(stderr, "usage: %s [threshold] < readings.txt\n", argv[0]);
@@ -45,36 +40,21 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    while (fgets(line, sizeof line, stdin) != NULL) {
-        int i = 0;
-        while (line[i] == ' ' || line[i] == '\t')
-            i++;
-        if (line[i] == '\n' || line[i] == '\0' || line[i] == '#')
-            continue;
-        if (count == MAX_READINGS) {
-            fprintf(stderr, "warning: more than %d readings, the rest are ignored\n", MAX_READINGS);
-            break;
-        }
-        if (sscanf(line, "%d %f %f", &ticks[count], &temps[count], &hums[count]) == 3)
-            count++;
-        else
-            skipped++;
-    }
+    struct reading_result r = reading_read(stdin, ticks, temps, hums, MAX_READINGS);
+    int count = r.count;
 
     printf("readings: %d\n", count);
-    printf("skipped:  %d\n", skipped);
-    if (count == 0) {
+    printf("skipped:  %d\n", r.skipped);
+    if (count == 0) {                   /* stats assume n >= 1 */
         printf("no readings, no summary\n");
         return 0;
     }
 
-    /* temperature and humidity: each statistic is one function, called twice */
     printf("temperature: min %6.1f  max %6.1f  mean %6.2f C\n",
            stats_min(temps, count), stats_max(temps, count), stats_mean(temps, count));
     printf("humidity:    min %6.1f  max %6.1f  mean %6.2f %%RH\n",
            stats_min(hums, count), stats_max(hums, count), stats_mean(hums, count));
 
-    /* longest run of consecutive readings above the threshold */
     struct stats_run run = stats_longest_run_above(temps, count, threshold);
     if (run.length == 0)
         printf("above %.1f C: never\n", threshold);
