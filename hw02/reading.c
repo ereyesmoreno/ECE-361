@@ -16,7 +16,7 @@ static int is_blank_or_comment(const char line[]) {
 }
 
 struct reading_result reading_read(FILE *in, int ticks[], float temps[],
-                                   float hums[], int max) {
+    float hums[], int max) {
     struct reading_result r = {0, 0};
     char line[LINE_LEN];
 

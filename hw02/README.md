@@ -1,7 +1,6 @@
 Estefani Reyes Moreno
 ECE 361 - Homework 2 
 
-**Part 1: What I would change from the hw02_starter**
 1. Because no global variables are allowed, the current ones in readings.c would have to be changed. That would be ticks, temps, hums, count, skipped, and threshold as local variables in the main program and passed as parameters to the function that needs them. The readings.c file also needs to be split up into different pieces (reading, stats, and histogram).
 
 2. max_temp(int i) only works on the global temps array, because it reads temps and count directly. It will need to be changed to a recursive function that takes an array input and length: const float a[] and int n. This will allow it to work for temperature and humidity.
