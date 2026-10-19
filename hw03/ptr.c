@@ -12,12 +12,6 @@ void swap_float(float *a, float *b) {
     float t = *a; *a = *b; *b = t;      /* from slides ref: changes the caller's vars */
 }
 
-int a = 0;                              /* a and b init to 0 */
-int b = 0;
-
-swap(&a, &b);                           /* calls address of a and b */
-printf("a = %d, b = %d\n", a, b);           /* prints: a=0, b=0 */
-
 /* minmax ----------------------------------------------------------------------------------- */
 /* notes: return value says whether it worked, results come through as *min and *max */
 
@@ -27,40 +21,51 @@ int minmax(const float *a, int n, float *min, float *max) {
         return -1;
     } 
 
-    for (const float *p = a; p < a + n; p++) {
+    float lo = *a, hi = *a;  /* initialize lo and hi to the first value in a[0..n-1] */
+
+    for (const float *p = a + 1; p < a + n; p++) {
         /* store smallest of a[0..n-1] in *min */
-        if (*p < *min) {
-            *min = *p;
+        if (*p < lo) {
+            lo = *p;  /* update lo to the new smallest value */
         }
         /* store largest of a[0..n-1] in *max */
-        if (*p > *max) {
-            *max = *p;
+        if (*p > hi) {
+            hi = *p;  /* update hi to the new largest value */
       }
     }
+
+    *min = lo;  /* store smallest of a[0..n-1] in *min */
+    *max = hi;  /* store largest of a[0..n-1] in *max */
 
     return 0;   /* successful */
 }
 
 /* find_above ------------------------------------------------------------------------------- */
 const float *find_above(const float *a, int n, float threshold) {
-    for (const float *p = a; p < a + n: p++) {
+    if (a == NULL) {
+        return NULL; /* return NULL if a is NULL */
+    }
+
+    for (const float *p = a; p < a + n; p++) {
         /* return pointer to first value > threshold */
         if (*p > threshold) {
-            return *p;   
+            return p;
         }
-
-    return NULL; /* if no value > threshold, NULL */
     }
+
+    return NULL; /* return NULL if no value is greater than threshold */
 }
 
 /* reverse ---------------------------------------------------------------------------------- */
 
 void reverse(float *a, int n) {
+    if (a == NULL || n < 2) {
+        return; /* do nothing if a is NULL or n<2 */
+    }
+
     /* reverse a[0..n-1] */
     /* for (start; keep going while; step) */
     for (float *lo = a, *hi = a + n - 1; lo < hi; lo++, hi--) {
         swap_float(lo, hi);  /* swap the values at lo and hi from the pre-made function */
     }
-
-    return NULL; 
 }
