@@ -53,6 +53,14 @@ const float *find_above(const float *a, int n, float threshold) {
     }
 }
 
-
 /* reverse ---------------------------------------------------------------------------------- */
 
+void reverse(float *a, int n) {
+    /* reverse a[0..n-1] */
+    /* for (start; keep going while; step) */
+    for (float *lo = a, *hi = a + n - 1; lo < hi; lo++, hi--) {
+        swap_float(lo, hi);  /* swap the values at lo and hi from the pre-made function */
+    }
+
+    return NULL; 
+}
