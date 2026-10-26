@@ -87,26 +87,56 @@ int tally_add(tally_t *t, const char *name) {
     if (t == NULL || name == NULL) {
         return -1;
     }
-    /* check the length before copying */
-    if (strlen(name) > TALLY_LEN) {
-        return -1; /* name too long */
+
+    /* check the length before copying anything (ref: slide 7) */
+    size_t len = strlen(name);
+    if (len == 0 || len > TALLY_LEN) {
+        return -1;                  /* name too long or empty */
     }
-    /* look for the name in the tally and find position (at same time)*/
+
+    /* look for the name in the tally and find position at same time */
+    int pos = t->n;                 /* default position is at the end */
     for (int i = 0; i < t-> n; i++) {
-        if (strcmp(t->e[i].name, name) == 0) {
-            t->e[i].count++;
-            return 0; /* name found, increment count and return success */
+        int cmp = strcmp(t->e[i].name, name);
+        if (cmp == 0) {
+            t->e[i].count++;        /* name found, increment count */
+            return t->e[i].count;   /* the new count */
+        }
+        if (cmp > 0) {             /* name is less than t->e[i].name */
+            pos = i;                /* insert before t->e[i] */
+            break;
         }
     }
+
     /* if name not found (new name): if t->n == TALLY_NAMES, return -1 (full) */
     if (t->n == TALLY_NAMES) {
-        return -1; /* tally is full */
+        return -1;                     /* tally is full */
     }
-    /* make room: shift backwards from the end to pos (ref: slide 20) */
 
-    
+    /* make room: shift backwards from the end to pos (ref: slide 20) */
+    for (int k = t->n; k > pos; k--) {
+        t->e[k] = t->e[k - 1];
+    }
+
     /* write the new entry at e[pos]:
     *  memcpy(t->e[pos].name, name, len + 1); (letters + '\0') 
     *  set its count to 1, add 1 to t->n, return 1 */
+    memcpy(t->e[pos].name, name, len + 1);
+    t->e[pos].count = 1;
+    t->n++;
+    return 1; /* new name added successfully */
+}
 
+/*---------------------------------------------------------------------*/
+void tally_print(const tally_t *t, FILE *out) {
+    /* NULL check for t and out */
+    if (t == NULL || out == NULL) {
+        return;
+    }
+    
+    /* loop i from 0 to t->n-1 */
+    for (int i = 0; i < t->n; i++) {
+        /* print each entry (name and count) */
+        fprintf(out, "%s %d\n", t->e[i].name, t->e[i].count);
+    }
 }
