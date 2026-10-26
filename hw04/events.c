@@ -41,3 +41,4 @@ int main(void) {
 
     tally_destroy(t);
     return 0;
+}

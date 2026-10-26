@@ -1,0 +1,8 @@
+# door events
+OPEN
+CLOSE
+
+OPEN
+LOCK
+DOOR_SENSOR_FAULTED
+OPEN
