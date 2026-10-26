@@ -4,3 +4,4 @@ hw02/tests/test_stats
 hw02/tests/depth
 out.txt
 project/dryer
+hw03/tests/test_ptr
