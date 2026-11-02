@@ -25,25 +25,9 @@ Example trace line: `GOT2 4 RIGHT -> OPEN UNLOCK` (state, character, event, next
 
 ## State diagram
 
-```
-            E_RIGHT / NONE        E_RIGHT / NONE        E_RIGHT / UNLOCK
-  +--------+   ('3')    +------+    ('1')    +------+    ('4')    +------+
-  | LOCKED | ---------> | GOT1 | ----------> | GOT2 | ----------> | OPEN |
-  +--------+            +------+             +------+             +------+
-    ^  ^  ^                |                    |                    |
-    |  |  |                |                    |                    |
-    |  |  +-- E_WRONG / BEEP, E_TIMEOUT / NONE -+                    |
-    |  |                   |                                         |
-    |  +-- E_WRONG / BEEP, E_TIMEOUT / NONE                          |
-    |                                                                |
-    +--------------------- E_CLOSE, E_TIMEOUT / LOCK ----------------+
+![State Diagram of the lock](images/state_diagram.jpeg)
 
-  Self-loops (the state does not change):
-    LOCKED: E_WRONG / BEEP, E_CLOSE / NONE, E_TIMEOUT / NONE
-    GOT1:   E_CLOSE / NONE
-    GOT2:   E_CLOSE / NONE
-    OPEN:   E_RIGHT / NONE, E_WRONG / NONE
-```
+
 
 ## Transition table
 
