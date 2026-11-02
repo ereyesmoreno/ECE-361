@@ -59,7 +59,6 @@ int lock_event(state_t s, char c)
     if (c < '0' || c > '9') {           /* not a digit and not c or t */
         return -1;
     }
-}
 
     switch (s) {
         case LOCKED:                    /* code is 3-1-4: first digit is 3 */
@@ -73,6 +72,20 @@ int lock_event(state_t s, char c)
         default:
             return -1;                  /* invalid state */
     }
+
+    switch (s) {
+        case LOCKED:                    /* code is 3-1-4: first digit is 3 */
+            return (c == '3') ? E_RIGHT : E_WRONG;
+        case GOT1:                      /* second digit is 1 */
+            return (c == '1') ? E_RIGHT : E_WRONG;
+        case GOT2:                      /* third digit is 4 */
+            return (c == '4') ? E_RIGHT : E_WRONG;
+        case OPEN:                      /* open: digits do nothing */
+            return E_WRONG;
+        default:
+            return -1;                  /* invalid state */
+    }
+}
 
 const char *state_name(state_t s)
 {
