@@ -1,0 +1,23 @@
+# Scenario: switches.txt - Tests switch press, hold, release, and LED toggles
+start 1791244800
+
+# Tick 0: Initial state - all switches OFF
+0 20.0 40.0 0x0
+
+# Tick 1: Switch 0 press (0->1) -> LED 0 should turn ON (pressed=0x1, leds=0x1)
+1 20.0 40.0 0x1
+
+# Ticks 2-3: Hold Switch 0 -> No new presses, LED 0 stays ON (pressed=0x0, leds=0x1)
+2 20.0 40.0 0x1
+
+# Tick 4: Switch 0 release (1->0) -> Releases don't toggle, LED 0 stays ON (pressed=0x0, leds=0x1)
+4 20.0 40.0 0x0
+
+# Tick 5: Switch 0 second press (0->1) -> LED 0 toggles OFF (pressed=0x1, leds=0x0)
+5 20.0 40.0 0x1
+
+# Tick 6: Release Switch 0 again -> LED 0 stays OFF (pressed=0x0, leds=0x0)
+6 20.0 40.0 0x0
+
+# Tick 7: Simultaneous press of Switch 0 and Switch 1 (0x3) -> LEDs 0 and 1 toggle ON (pressed=0x3, leds=0x3)
+7 20.0 40.0 0x3
