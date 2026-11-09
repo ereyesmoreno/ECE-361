@@ -2,17 +2,17 @@
 # Start at 2026-10-06 23:59:55 UTC (5 seconds before Oct 7 midnight: 1791331200 - 5 = 1791331195)
 start 1791331195
 
-# Tick 0: Standard temperature and humidity
+# Tick 0: Standard temperature and humidity (23:59:55)
 0 21.5 40.0 0x0
 
-# Tick 2: Test 91.0 C threshold from lecture & gap holding value between tick 0 and 2
+# Tick 2: Test 91.0 C threshold from lecture & gap holding value between tick 0 and 2 (23:59:57)
 2 91.0 55.5 0x0
 
-# Tick 4: Test negative temperature (-12.3 C)
+# Tick 4: 23:59:59, the last second of Oct 6 - Test negative temperature (-12.3 C)
 4 -12.3 80.0 0x0
 
-# Tick 5: 23:59:59 (1 second before midnight)
+# Tick 5: 00:00:00, the date changes to 2026-10-07
 5 20.0 40.0 0x0
 
-# Tick 6: 00:00:00 (Oct 7 rollover check - date changes to 2026-10-07)
+# Tick 6: 00:00:01, after midnight (tick 5 values hold)
 6 20.0 40.0 0x0
