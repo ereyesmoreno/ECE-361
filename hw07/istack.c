@@ -43,7 +43,7 @@ int istack_push(istack_t *stack, int value) {
         return -1;
     }
     if (stack->count == stack->capacity) {
-        if (stack->capacity == SIZE_MAX / 2 / sizeof *stack->data) {
+        if (stack->capacity > SIZE_MAX / 2 / sizeof *stack->data) {
             return -1;
         }
         int *bigger = realloc(stack->data, stack->capacity * 2 * sizeof *stack->data);
@@ -68,7 +68,7 @@ int istack_pop(istack_t *stack, int *value) {
     return 0;
 }
 
-int istack_peek(istack_t *stack, int *value) {
+int istack_peek(const istack_t *stack, int *value) {
     if (stack == NULL || stack->count == 0) {
         return -1;
     }
@@ -78,7 +78,7 @@ int istack_peek(istack_t *stack, int *value) {
     return 0;
 }
 
-size_t istack_count(istack_t *stack) {
+size_t istack_count(const istack_t *stack) {
     return stack == NULL ? 0 : stack->count;
 }
 
@@ -89,19 +89,18 @@ bool istack_is_empty(const istack_t *stack) {
 size_t istack_capacity(const istack_t *stack) {
     return stack == NULL ? 0 : stack->capacity;
 }
-
 int *istack_to_array(const istack_t *stack, size_t *n) {
-    if (stack != NULL) {
-        *n = 0;
+    if (n != NULL) {
+        *n = 0;                         /* covers every NULL return below */
     }
-    if (s == NULL || s->count == 0 || n == NULL) {
+    if (stack == NULL || stack->count == 0 || n == NULL) {
         return NULL;
-    } 
+    }
     int *array = malloc(stack->count * sizeof *array);
     if (array == NULL) {
         return NULL;
     }
     memcpy(array, stack->data, stack->count * sizeof *array);
+    *n = stack->count;                  /* tell the caller how many */
     return array;
 }
-
