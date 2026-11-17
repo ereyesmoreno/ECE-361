@@ -1,10 +1,8 @@
-/*
- * istack.h
- *
- * Header file for the integer stack (HW7).
- * A stack of int that grows as it fills. The struct is opaque:
- * it is defined only in istack.c.
- */
+/* 
+* HW7: istack.h
+*
+* Interface for a simple integer stack implementation.
+*/
 
 #ifndef ISTACK_H
 #define ISTACK_H
@@ -12,78 +10,77 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#define ISTACK_START 8                 /* room at first; doubles when full */
+#define ISTACK_START 8
+typedef struct istack istack_t; /* opaque type */
 
-typedef struct istack istack_t;        /* opaque */
-
-/* istack_create: create a new integer stack
- * Takes:   nothing
- * Returns: a new, empty stack with room for ISTACK_START values,
- *          or NULL if memory runs out (nothing is leaked)
- * Assumes: nothing
+/* istack_create: creates a new, empty stack with room for ISTACK_START values, 
+ * or NULL if memory allocation fails
+ * takes: nothing (void)
+ * returns: a new, empty stack with room for ISTACK_START values, or NULL if memory runs out (and nothing leaked)
+ * assumes: nothing
  */
 istack_t *istack_create(void);
 
-/* istack_destroy: free an integer stack
- * Takes:   a stack from istack_create, or NULL
- * Returns: nothing; frees the stack and its array. NULL does nothing.
- * Assumes: the stack is not used again after this call
+/* istack_destroy: frees the stack and its contents (inside array first, then 
+ * the struct itself)
+ * takes: pointer to stack s
+ * returns: nothing (void)
+ * assumes: s may be NULL (does nothing if NULL)
  */
-void istack_destroy(istack_t *stack);
+void istack_destroy(istack_t *s);
 
-/* istack_push: push a value onto the stack
- * Takes:   a stack and the value to push
- * Returns: 0 on success; -1 if stack is NULL or memory runs out,
- *          and then the stack is unchanged
- * Assumes: if the stack is full, it first doubles its room with realloc
+/* istack_push: pushes v onto the top of stack s; if the stack is full, first 
+ * doubles the room with realloc
+ * takes: pointer to stack s, integer value v
+ * returns: 0, or -1 if s is NULL or memory runs out: then the stack is unchanged
+ * assumes: s is valid or NULL
  */
-int istack_push(istack_t *stack, int value);
+int istack_push(istack_t *s, int v);
 
-/* istack_pop: remove the top value from the stack
- * Takes:   a stack and a pointer for the top value (value may be NULL)
- * Returns: 0 on success, storing the top value in *value;
- *          -1 if stack is NULL or empty, and then *value is unchanged
- * Assumes: nothing
+/* istack_pop: puts the top value into *v and removes it from the stack
+ * takes: pointer to stack s, pointer to int v where popped value is stored 
+ * returns: 0, or -1 if s is NULL or empty: then *v is unchanged
+ * assumes: v may be NULL; if not NULL, points to valid memory
  */
-int istack_pop(istack_t *stack, int *value);
+int istack_pop(istack_t *s, int *v);
 
-/* istack_peek: look at the top value without removing it
- * Takes:   a stack (only looked at) and a pointer for the top value
- *          (value may be NULL)
- * Returns: 0 on success, storing the top value in *value;
- *          -1 if stack is NULL or empty, and then *value is unchanged
- * Assumes: nothing
+/* istack_peek: puts the top value into *v without removing it from the stack
+ * takes: pointer to const stack s, pointer to int v where top value is stored 
+ * returns: 0, or -1 if s is NULL or empty: then *v is unchanged
+ * assumes: v may be NULL; if not NULL, points to valid memory
  */
-int istack_peek(const istack_t *stack, int *value);
+int istack_peek(const istack_t *s, int *v);
 
-/* istack_count: how many values the stack holds
- * Takes:   a stack (only looked at)
- * Returns: the number of values; 0 if stack is NULL
- * Assumes: nothing
+/* istack_count: returns how many values the stack holds right now
+ * takes: pointer to const stack s
+ * returns: number of values held in stack or 0 if s is NULL
+ * assumes: nothing
  */
-size_t istack_count(const istack_t *stack);
+size_t istack_count(const istack_t *s);
 
-/* istack_is_empty: whether the stack holds no values
- * Takes:   a stack (only looked at)
- * Returns: true if it is empty or stack is NULL, false otherwise
- * Assumes: nothing
+/* istack_is_empty: returns whether the stack holds any values
+ * takes: pointer to const stack s
+ * returns: true if stack holds no values or if s is NULL, false otherwise
+ * assumes: nothing
  */
-bool istack_is_empty(const istack_t *stack);
+bool istack_is_empty(const istack_t *s);
 
-/* istack_capacity: how many values fit right now without growing
- * Takes:   a stack (only looked at)
- * Returns: the current room; 0 if stack is NULL
- * Assumes: nothing
+/* istack_capacity: returns the room/capacity of the stack right now
+ * takes: pointer to const stack s
+ * returns: current capacity/room right now, or 0 if s is NULL
+ * assumes: nothing
  */
-size_t istack_capacity(const istack_t *stack);
+size_t istack_capacity(const istack_t *s);
 
-/* istack_to_array: copy the values into a new array
- * Takes:   a stack (only looked at) and a pointer n for the length
- * Returns: a new array of the values, bottom first, with their number
- *          in *n; NULL and *n = 0 if stack is NULL, empty, or memory
- *          runs out
- * Assumes: n is not NULL. The caller owns the array and must free it.
+/* istack_to_array: returns a new array of the values (bottom first), 
+ * and their number in *n; the caller owns it and must free it
+ * takes: pointer to const stack s, pointer to size_t n where array length 
+ * is stored
+ * returns: new copy of stack values in array (bottom first), or
+ * NULL and *n = 0 if s is NULL, empty, or memory runs out
+ * assumes: n is a valid pointer to size_t
+ * ownership rule: the caller owns the array and must free it 
  */
-int *istack_to_array(const istack_t *stack, size_t *n);
+int *istack_to_array(const istack_t *s, size_t *n);
 
 #endif /* ISTACK_H */
