@@ -1,7 +1,6 @@
 /*
- * istack.c
- *
- * Implementation file for the integer stack.
+ * ECE 361, HW 7 - istack.c
+ * Implementation of a dynamic integer stack ADT using a growing array.
  */
 
 #include "istack.h"
@@ -9,98 +8,169 @@
 #include <stdint.h>
 #include <string.h>
 
+/* 
+ * The opaque struct istack definition. 
+ * It lives only here in istack.c, keeping implementation details hidden from callers[cite: 3, 22].
+ */
 struct istack {
-    int *data;
-    size_t count;
-    size_t capacity;
+    int   *data;    /* Pointer to the heap-allocated array holding stack values[cite: 3, 22] */
+    size_t count;   /* Number of elements currently stored in the stack[cite: 3, 22] */
+    size_t cap;     /* Maximum number of elements the current array can hold before resizing[cite: 3, 22] */
 };
 
+/* 
+ * istack_create: Allocates and initializes a new empty stack.
+ */
 istack_t *istack_create(void) {
-    istack_t *stack = malloc(sizeof *stack);
-    if (stack == NULL) {
+    /* Step 1: Allocate memory for the stack struct container itself */
+    istack_t *s = malloc(sizeof *s);
+    if (s == NULL) {
+        return NULL; /* Out of memory; return NULL safely[cite: 3] */
+    }
+
+    /* Step 2: Allocate the initial backing array with room for ISTACK_START (8) ints */
+    s->data = malloc(ISTACK_START * sizeof *s->data);
+    if (s->data == NULL) {
+        free(s);     /* Clean up the struct container if array allocation fails (prevent leaks)[cite: 24] */
         return NULL;
     }
-    stack->data = malloc(ISTACK_START * sizeof *stack->data);
-    if (stack->data == NULL) {
-        free(stack);
-        return NULL;
-    }
-    stack->count = 0;
-    stack->capacity = ISTACK_START;
-    return stack;
+
+    /* Step 3: Initialize fields and return the new stack pointer */
+    s->count = 0;
+    s->cap = ISTACK_START;
+    return s;
 }
 
-void istack_destroy(istack_t *stack) {
-    if (stack == NULL) { 
-        return;
+/* 
+ * istack_destroy: Frees all heap memory associated with the stack.
+ */
+void istack_destroy(istack_t *s) {
+    if (s == NULL) {
+        return; /* NULL does nothing, as specified[cite: 3] */
     }
-    free(stack->data);
-    free(stack);
+    /* Destroy inside-out: free the inner array first, then the outer struct[cite: 24, 25] */
+    free(s->data);
+    free(s);
 }
 
-int istack_push(istack_t *stack, int value) {
-    if (stack == NULL) {
-        return -1;
+/* 
+ * istack_push: Pushes an integer onto the stack, doubling capacity via realloc if full.
+ */
+int istack_push(istack_t *s, int v) {
+    if (s == NULL) {
+        return -1; /* Cannot push to a NULL stack[cite: 3] */
     }
-    if (stack->count == stack->capacity) {
-        if (stack->capacity > SIZE_MAX / 2 / sizeof *stack->data) {
+
+    /* Check if the stack has reached its current capacity limit */
+    if (s->count == s->cap) {
+        /* Prevent integer overflow before doubling capacity */
+        if (s->cap > SIZE_MAX / 2 / sizeof *s->data) {
             return -1;
         }
-        int *bigger = realloc(stack->data, stack->capacity * 2 * sizeof *stack->data);
+
+        /* 
+         * Use a temporary pointer (bigger) for realloc so that if realloc fails 
+         * and returns NULL, we don't overwrite s->data and lose our only reference[cite: 15, 35].
+         */
+        int *bigger = realloc(s->data, 2 * s->cap * sizeof *s->data);
         if (bigger == NULL) {
-            return -1;
+            return -1; /* Stack remains completely unchanged on failure[cite: 3, 35] */
         }
-        stack->data = bigger;
-        stack->capacity *= 2;
+
+        s->data = bigger;
+        s->cap *= 2;   /* Successfully doubled capacity */
     }
-    stack->data[stack->count] = value;
-    stack->count++;
+
+    /* Insert value at the top and increment count */
+    s->data[s->count++] = v;
     return 0;
 }
-int istack_pop(istack_t *stack, int *value) {
-    if (stack == NULL || stack->count == 0) {
+
+/* 
+ * istack_pop: Removes and returns the top value of the stack.
+ */
+int istack_pop(istack_t *s, int *v) {
+    /* Fails if the stack is NULL or empty */
+    if (s == NULL || s->count == 0) {
         return -1;
     }
-    stack->count--;
-    if (value != NULL) {
-        *value = stack->data[stack->count];
+
+    /* Decrement count first to point to the top element */
+    s->count--;
+
+    /* Only write to *v if the caller provided a non-NULL pointer[cite: 3] */
+    if (v != NULL) {
+        *v = s->data[s->count];
     }
     return 0;
 }
 
-int istack_peek(const istack_t *stack, int *value) {
-    if (stack == NULL || stack->count == 0) {
+/* 
+ * istack_peek: Inspects the top value of the stack without removing it.
+ */
+int istack_peek(const istack_t *s, int *v) {
+    /* Fails if the stack is NULL or empty */
+    if (s == NULL || s->count == 0) {
         return -1;
     }
-    if (value != NULL) {
-        *value = stack->data[stack->count - 1];
+
+    /* Only write to *v if the caller provided a non-NULL pointer[cite: 3] */
+    if (v != NULL) {
+        *v = s->data[s->count - 1]; /* Look at the top element without altering count */
     }
     return 0;
 }
 
-size_t istack_count(const istack_t *stack) {
-    return stack == NULL ? 0 : stack->count;
+/* 
+ * istack_count: Returns the number of elements currently in the stack.
+ */
+size_t istack_count(const istack_t *s) {
+    return s == NULL ? 0 : s->count; /* Returns 0 safely if stack is NULL[cite: 3] */
 }
 
-bool istack_is_empty(const istack_t *stack) {
-    return stack == NULL || stack->count == 0;
+/* 
+ * istack_is_empty: Checks whether the stack contains any elements.
+ */
+bool istack_is_empty(const istack_t *s) {
+    return s == NULL ? true : (s->count == 0); /* Returns true if NULL or empty[cite: 3] */
 }
 
-size_t istack_capacity(const istack_t *stack) {
-    return stack == NULL ? 0 : stack->capacity;
+/* 
+ * istack_capacity: Returns the current allocated room/capacity of the stack.
+ */
+size_t istack_capacity(const istack_t *s) {
+    return s == NULL ? 0 : s->cap; /* Returns 0 safely if stack is NULL[cite: 3] */
 }
-int *istack_to_array(const istack_t *stack, size_t *n) {
+
+/* 
+ * istack_to_array: Copies stack contents into a new dynamically allocated array (bottom first).
+ */
+int *istack_to_array(const istack_t *s, size_t *n) {
+    /* First line: set *n to 0 so every early exit is already covered[cite: 3] */
     if (n != NULL) {
-        *n = 0;                         /* covers every NULL return below */
+        *n = 0;
     }
-    if (stack == NULL || stack->count == 0 || n == NULL) {
+
+    /* Fail if stack is NULL, empty, or n is NULL[cite: 3] */
+    if (s == NULL || s->count == 0 || n == NULL) {
         return NULL;
     }
-    int *array = malloc(stack->count * sizeof *array);
-    if (array == NULL) {
+
+    /* Prevent multiplication overflow when calculating memory size */
+    if (s->count > SIZE_MAX / sizeof(int)) {
         return NULL;
     }
-    memcpy(array, stack->data, stack->count * sizeof *array);
-    *n = stack->count;                  /* tell the caller how many */
-    return array;
+
+    /* Allocate a fresh array for the caller */
+    int *arr = malloc(s->count * sizeof *arr);
+    if (arr == NULL) {
+        return NULL;
+    }
+
+    /* Copy existing stack elements (bottom first) into the new array */
+    memcpy(arr, s->data, s->count * sizeof *arr);
+    
+    /* Set the output length parameter and return the new array (caller owns it)[cite: 3] */
+    *n = s->count;
+    return arr;
 }
