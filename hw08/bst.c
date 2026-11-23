@@ -127,6 +127,14 @@ bool bst_contains(const bst_t *t, int key, size_t *visits)
     }
 
     const struct node *current = t->root;
+    if (current == NULL)
+    { /* fix: empty tree */
+        if (visits != NULL)
+        {
+            *visits = 0;
+        }
+        return false;
+    }
 
     while (current->key != key)
     {
