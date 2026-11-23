@@ -2,10 +2,13 @@ CC     = gcc
 CFLAGS = -std=c11 -Wall -Wextra -g -I.
 SAN    = -fsanitize=address,undefined -fno-omit-frame-pointer
 
-all: test_bst
+all: test_bst treestats
 
 test_bst: tests/test_bst.c bst.c bst.h
 	$(CC) $(CFLAGS) -o $@ tests/test_bst.c bst.c
+
+treestats: treestats.c bst.c bst.h
+	$(CC) $(CFLAGS) -o $@ treestats.c bst.c
 
 test: test_bst
 	./test_bst

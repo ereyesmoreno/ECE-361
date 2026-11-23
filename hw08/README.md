@@ -8,7 +8,6 @@ an opaque `bst_t`, no globals, no printing, and every node freed.
 ## Files
 
 | File | What it is |
-|---|---|
 | `bst.h` | The interface: the opaque `bst_t` and six functions |
 | `bst.c` | The implementation; each function says which original function it came from |
 | `tests/test_bst.c` | Tests; prints PASS or FAIL per test, exits nonzero on any failure |
@@ -47,20 +46,22 @@ commit history).
 
 ## What order does to a tree
 
-TODO: paste both outputs after `treestats` is done.
+Both outputs after `treestats` is done.
 
 **Increasing order** (`seq 1 1023 | ./treestats`):
 
 ```
-PASTE OUTPUT HERE
+n 1023, height 1023
 ```
 
 **Shuffled order** (`seq 1 1023 | sort -R | ./treestats`):
 
 ```
-PASTE OUTPUT HERE
+n 1023, height 23
 ```
 
 TODO: two sentences in your own words. Cover what increasing order does to the height
 compared with shuffled order, and what that means for the most visits a search can take
 (the worst case equals the height).
+
+Increasing order sends every key to the right with the tree becoming a chain of height 1023. This is the same as a linked list. With a shuffled order, the height becomes 23. This means that for the most visits a searcg can take, it takes as many visits as the tree's heigh. The worst case goes from 1023 visits for the chain to 23 for the shuffled order.
